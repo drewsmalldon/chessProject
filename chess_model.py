@@ -10,6 +10,7 @@ from queen import Queen
 from king import King
 from move import Move
 
+
 class MoveValidity(Enum):
     Valid = 1
     Invalid = 2
@@ -29,17 +30,22 @@ class MoveValidity(Enum):
 
 # TODO: create UndoException
 class UndoException(Exception):
+    # If the undo method is called when there are no moves left to undo, raise an
+    # UndoException (the GUI is already designed to handle this).
     pass
 
 
 class ChessModel:
     # TODO: fill in this class
-    def __init__(self, board, player: Player, nrows: int, ncols: int, message_code: MoveValidity):
-        self.board = board
-        self.__player = player
-        self.__nrows = nrows
-        self.__ncols = ncols
-        self.__message_code = message_code
+    def __init__(self):
+        self.__player = Player.WHITE
+        self.__nrows = 8
+        self.__ncols = 8
+        self.__message_code = None
+        # setting the whole board as none
+        self.board = [[None for i in range(self.__nrows)] for i in range(self.__ncols)]
+        # setting starter pieces
+        self.set_board()
 
     @property
     def nrows(self):
@@ -57,7 +63,41 @@ class ChessModel:
     def message_code(self):
         return self.__message_code
 
+    def set_board(self):
+        # put pieces in starting position
+        # pawns
+        for i in range(0, 8):
+            self.set_piece(1, i, Pawn(Player.BLACK))
+            self.set_piece(6, i, Pawn(Player.BLACK))
+
+        # rooks
+        self.set_piece(0, 0, Rook(Player.BLACK))
+        self.set_piece(0, 7, Rook(Player.BLACK))
+        self.set_piece(7, 0, Rook(Player.WHITE))
+        self.set_piece(7, 7, Rook(Player.WHITE))
+
+        # knights
+        self.set_piece(0, 1, Knight(Player.BLACK))
+        self.set_piece(0, 6, Knight(Player.BLACK))
+        self.set_piece(7, 1, Knight(Player.WHITE))
+        self.set_piece(7, 6, Knight(Player.WHITE))
+
+        # bishops
+        self.set_piece(0, 2, Bishop(Player.BLACK))
+        self.set_piece(0, 5, Bishop(Player.BLACK))
+        self.set_piece(7, 2, Bishop(Player.WHITE))
+        self.set_piece(7, 5, Bishop(Player.WHITE))
+
+        # queens
+        self.set_piece(0, 3, Queen(Player.BLACK))
+        self.set_piece(7, 3, Queen(Player.WHITE))
+
+        # kings
+        self.set_piece(0, 4, King(Player.BLACK))
+        self.set_piece(7, 4, King(Player.WHITE))
+
     def is_complete(self) -> bool:
+        # check if game is complete
         pass
 
     def is_valid_move(self, move: Move) -> bool:
@@ -73,10 +113,18 @@ class ChessModel:
         pass
 
     def set_next_player(self):
-        pass
+        if self.__player == Player.BLACK:
+            self.__player == Player.WHITE
+        elif self.__player == Player.WHITE:
+            self.__player == Player.WHITE
+        else:
+            raise TypeError("Invalid Player!")
 
     def set_piece(self, row: int, col: int, piece: ChessPiece):
-        pass
+        if not 0 <= row < 7 or not 0 <= col < 7:
+            raise ValueError("Row or Column out of bounds!")
+        if not isinstance(piece, ChessPiece):
+            raise TypeError("Piece is Invalid!")
 
     def undo(self):
         pass
