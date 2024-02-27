@@ -113,12 +113,7 @@ class ChessModel:
         pass
 
     def set_next_player(self):
-        if self.__player == Player.BLACK:
-            self.__player == Player.WHITE
-        elif self.__player == Player.WHITE:
-            self.__player == Player.WHITE
-        else:
-            raise TypeError("Invalid Player!")
+        pass
 
     def set_piece(self, row: int, col: int, piece: ChessPiece):
         if not 0 <= row < 7 or not 0 <= col < 7:
