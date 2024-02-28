@@ -64,11 +64,26 @@ class ChessModel:
         return self.__message_code
 
     def set_board(self):
+        # THIS THROWS AN ERROR WHEN GUI TRIES TO RUN, COULD BE WRONG
         # put pieces in starting position
         # pawns
-        for i in range(0, 8):
-            self.set_piece(1, i, Pawn(Player.BLACK))
-            self.set_piece(6, i, Pawn(Player.BLACK))
+        self.set_piece(1, 0, Pawn(Player.BLACK))
+        self.set_piece(1, 1, Pawn(Player.BLACK))
+        self.set_piece(1, 2, Pawn(Player.BLACK))
+        self.set_piece(1, 3, Pawn(Player.BLACK))
+        self.set_piece(1, 4, Pawn(Player.BLACK))
+        self.set_piece(1, 5, Pawn(Player.BLACK))
+        self.set_piece(1, 6, Pawn(Player.BLACK))
+        self.set_piece(1, 7, Pawn(Player.BLACK))
+
+        self.set_piece(6, 0, Pawn(Player.WHITE))
+        self.set_piece(6, 1, Pawn(Player.WHITE))
+        self.set_piece(6, 2, Pawn(Player.WHITE))
+        self.set_piece(6, 3, Pawn(Player.WHITE))
+        self.set_piece(6, 4, Pawn(Player.WHITE))
+        self.set_piece(6, 5, Pawn(Player.WHITE))
+        self.set_piece(6, 6, Pawn(Player.WHITE))
+        self.set_piece(6, 7, Pawn(Player.WHITE))
 
         # rooks
         self.set_piece(0, 0, Rook(Player.BLACK))
