@@ -1,3 +1,4 @@
+import copy
 from enum import Enum
 from player import Player
 from move import Move
@@ -36,105 +37,223 @@ class UndoException(Exception):
 
 
 class ChessModel:
-    # TODO: fill in this class
+    '''
+    This class creates a model of the game of chess. This class holds the chessboard and all the game logic
+    '''
     def __init__(self):
         self.__player = Player.WHITE
         self.__nrows = 8
         self.__ncols = 8
         self.__message_code = None
-        # setting the whole board as none
-        self.board = [[None for i in range(self.__nrows)] for i in range(self.__ncols)]
-        # setting starter pieces
-        self.set_board()
+        self.board = [[None] * self.__ncols for i in range(self.__nrows)]
+
+        # Set up white pieces
+        self.set_piece(0, 0, Rook(Player.BLACK))
+        self.set_piece(0, 1, Knight(Player.BLACK))
+        self.set_piece(0, 2, Bishop(Player.BLACK))
+        self.set_piece(0, 3, Queen(Player.BLACK))
+        self.set_piece(0, 4, King(Player.BLACK))
+        self.set_piece(0, 5, Bishop(Player.BLACK))
+        self.set_piece(0, 6, Knight(Player.BLACK))
+        self.set_piece(0, 7, Rook(Player.BLACK))
+        for col in range(8):
+            self.set_piece(1, col, Pawn(Player.BLACK))
+
+        # Set up black pieces
+        self.set_piece(7, 0, Rook(Player.WHITE))
+        self.set_piece(7, 1, Knight(Player.WHITE))
+        self.set_piece(7, 2, Bishop(Player.WHITE))
+        self.set_piece(7, 3, Queen(Player.WHITE))
+        self.set_piece(7, 4, King(Player.WHITE))
+        self.set_piece(7, 5, Bishop(Player.WHITE))
+        self.set_piece(7, 6, Knight(Player.WHITE))
+        self.set_piece(7, 7, Rook(Player.WHITE))
+        for col in range(8):
+            self.set_piece(6, col, Pawn(Player.WHITE))
 
     @property
     def nrows(self):
+        '''
+        :return: number of rows
+        '''
         return self.__nrows
 
     @property
     def ncols(self):
+        '''
+        :return: number of columns
+        '''
         return self.__ncols
 
     @property
     def current_player(self):
+        '''
+        :return: current player
+        '''
         return self.__player
 
     @property
-    def message_code(self):
+    def messageCode(self):
+        '''
+        :return: message code
+        '''
         return self.__message_code
 
-    def set_board(self):
-        # THIS THROWS AN ERROR WHEN GUI TRIES TO RUN, COULD BE WRONG
-        # put pieces in starting position
-        # pawns
-        self.set_piece(1, 0, Pawn(Player.BLACK))
-        self.set_piece(1, 1, Pawn(Player.BLACK))
-        self.set_piece(1, 2, Pawn(Player.BLACK))
-        self.set_piece(1, 3, Pawn(Player.BLACK))
-        self.set_piece(1, 4, Pawn(Player.BLACK))
-        self.set_piece(1, 5, Pawn(Player.BLACK))
-        self.set_piece(1, 6, Pawn(Player.BLACK))
-        self.set_piece(1, 7, Pawn(Player.BLACK))
-
-        self.set_piece(6, 0, Pawn(Player.WHITE))
-        self.set_piece(6, 1, Pawn(Player.WHITE))
-        self.set_piece(6, 2, Pawn(Player.WHITE))
-        self.set_piece(6, 3, Pawn(Player.WHITE))
-        self.set_piece(6, 4, Pawn(Player.WHITE))
-        self.set_piece(6, 5, Pawn(Player.WHITE))
-        self.set_piece(6, 6, Pawn(Player.WHITE))
-        self.set_piece(6, 7, Pawn(Player.WHITE))
-
-        # rooks
-        self.set_piece(0, 0, Rook(Player.BLACK))
-        self.set_piece(0, 7, Rook(Player.BLACK))
-        self.set_piece(7, 0, Rook(Player.WHITE))
-        self.set_piece(7, 7, Rook(Player.WHITE))
-
-        # knights
-        self.set_piece(0, 1, Knight(Player.BLACK))
-        self.set_piece(0, 6, Knight(Player.BLACK))
-        self.set_piece(7, 1, Knight(Player.WHITE))
-        self.set_piece(7, 6, Knight(Player.WHITE))
-
-        # bishops
-        self.set_piece(0, 2, Bishop(Player.BLACK))
-        self.set_piece(0, 5, Bishop(Player.BLACK))
-        self.set_piece(7, 2, Bishop(Player.WHITE))
-        self.set_piece(7, 5, Bishop(Player.WHITE))
-
-        # queens
-        self.set_piece(0, 3, Queen(Player.BLACK))
-        self.set_piece(7, 3, Queen(Player.WHITE))
-
-        # kings
-        self.set_piece(0, 4, King(Player.BLACK))
-        self.set_piece(7, 4, King(Player.WHITE))
-
     def is_complete(self) -> bool:
-        # check if game is complete
+        '''
+        This method will return true or false based on if the game is complete
+        :return: true or false
+        '''
         pass
 
     def is_valid_move(self, move: Move) -> bool:
-        pass
+        '''
+        This method will check if the move was valid
+        :param move: the spot the piece wants to move to
+        :return: true or false
+        '''
+        # check if move is within bounds
+        if (
+            move.from_row < 0 or
+            move.from_col < 0 or
+            move.from_row > self.__nrows or
+            move.from_col > self.__ncols
+        ):
+            self.__message_code = MoveValidity.Invalid
+            return False
+
+        if (
+            move.to_row < 0 or
+            move.to_col < 0 or
+            move.to_row > self.__nrows or
+            move.to_col > self.__ncols
+        ):
+            self.__message_code = MoveValidity.Invalid
+            return False
+
+        # grab the target piece object
+        piece = self.piece_at(move.from_row, move.to_row)
+        # if none, return false
+        if piece is None:
+            self.__message_code = MoveValidity.Invalid
+            return False
+
+        # make sure it is the players turn
+        if piece.player != self.current_player:
+            self.__message_code = MoveValidity.Invalid
+            return False
+
+        # Check specific pieces move validity
+        if not piece.is_valid_move(move, self.board):
+            self.__message_code = MoveValidity.Invalid
+            return False
+
+        # if player is currently in check, have to move out of check
+        if self.in_check(self.current_player):
+            self.__message_code = MoveValidity.StayingInCheck
+            return False
+
+        # create a copy of board called temp board to simulate the move
+        temp = copy.deepcopy(self.board)
+        # set old spot to none and update values
+        temp[move.to_row][move.to_col] = temp[move.from_row][move.from_col]
+        temp[move.from_row][move.from_col] = None
+
+        # check if in check after the move
+        if self.in_check(self.current_player, temp):
+            self.__message_code = MoveValidity.MovingIntoCheck
+            return False
+        # if all checks out, valid move
+        self.__message_code = MoveValidity.Valid
+        return True
 
     def move(self, move: Move):
-        pass
+        '''
+        carries out move provided in the move object
+        :param move: move object
+        :return: none
+        '''
+        if self.is_valid_move(move):
+            self.board[move.to_row][move.to_col] = self.board[move.from_row][move.from_col]
+            self.board[move.from_row][move.from_col] = None
 
-    def in_check(self, p: Player):
-        pass
+            self.set_next_player()
+            return True
+        else:
+            return False
 
+    def in_check(self, p: Player, board = None):
+        '''
+        Check if a player is in check
+        :param p: current player
+        :param board: whether it is temp or normal board
+        :return: none
+        '''
+        # allow board attribute to use a temp board for checking, if no board is passed, its the normal board
+        if board is None:
+            board = self.board
+        # initialize king row and col
+        king_row, king_col = None, None
+
+        # find the current location of the king of current player
+        for row in range(self.__nrows):
+            for col in range(self.__ncols):
+                piece = board[row][col]
+                if isinstance(piece, King) and piece.player == p:
+                    king_row, king_col = row, col
+                    break
+            if king_row is not None:
+                break
+        if king_row is None:
+            raise ValueError("King not on the board")
+
+        # check if opponent is threatening current players king
+        for row in range(self.__nrows):
+            for col in range(self.__ncols):
+                piece = board[row][col]
+                if piece is not None and piece.player != p:
+                    # move the piece to the king, if that is allowed, in check is true
+                    move = Move(row, col, king_row, king_col)
+                    if piece.is_valid_move(move, board):
+                        return True
     def piece_at(self, row: int, col: int) -> ChessPiece:
-        pass
+        '''
+        returns current piece at a current location
+        :param row: row
+        :param col: column
+        :return: chessPiece
+        '''
+        return self.board[row][col]
 
     def set_next_player(self):
-        pass
+        '''
+        sets the player to the next player after turn
+        :return: none
+        '''
+        if self.__player == Player.WHITE:
+            self.__player == Player.BLACK
+        else:
+            self.__player == Player.WHITE
 
     def set_piece(self, row: int, col: int, piece: ChessPiece):
-        if not 0 <= row < 7 or not 0 <= col < 7:
-            raise ValueError("Row or Column out of bounds!")
+        '''
+        sets piece on board
+        :param row: row
+        :param col: column
+        :param piece: what piece is it
+        :return: none
+        '''
+        # checks if row and col are in bounds
+        if not (0 <= row < self.__nrows) or not (0 <= col <= self.__ncols):
+            raise ValueError("Row and Column must be in bounds")
+        # check if piece is type chesspiece
         if not isinstance(piece, ChessPiece):
-            raise TypeError("Piece is Invalid!")
+            raise TypeError("Piece must be a Chess piece.")
+        self.board[row][col] = piece
 
     def undo(self):
+        '''
+        undo move
+        :return: none
+        '''
         pass
