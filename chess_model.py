@@ -132,7 +132,7 @@ class ChessModel:
             return False
 
         # grab the target piece object
-        piece = self.piece_at(move.from_row, move.to_row)
+        piece = self.piece_at(move.from_row, move.from_col)
         # if none, return false
         if piece is None:
             self.__message_code = MoveValidity.Invalid
@@ -146,11 +146,6 @@ class ChessModel:
         # Check specific pieces move validity
         if not piece.is_valid_move(move, self.board):
             self.__message_code = MoveValidity.Invalid
-            return False
-
-        # if player is currently in check, have to move out of check
-        if self.in_check(self.current_player):
-            self.__message_code = MoveValidity.StayingInCheck
             return False
 
         # create a copy of board called temp board to simulate the move
@@ -230,10 +225,10 @@ class ChessModel:
         sets the player to the next player after turn
         :return: none
         '''
-        if self.__player == Player.WHITE:
-            self.__player == Player.BLACK
+        if self.current_player == Player.WHITE:
+            self.__player = Player.BLACK
         else:
-            self.__player == Player.WHITE
+            self.__player = Player.WHITE
 
     def set_piece(self, row: int, col: int, piece: ChessPiece):
         '''
