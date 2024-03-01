@@ -213,8 +213,16 @@ class ChessModel:
             # add move to history
             self.__history.append(move)
 
-            # do the move
-            self.board[move.to_row][move.to_col] = self.board[move.from_row][move.from_col]
+            # check if pawn needs to get promoted
+            piece = self.board[move.from_row][move.from_col]
+            if isinstance(piece, Pawn) and (move.to_row == 0 or move.to_row == 7):
+                # replace with queen
+                self.board[move.to_row][move.to_col] = Queen(piece.player)
+            else:
+                # move normally
+                self.board[move.to_row][move.to_col] = self.board[move.from_row][move.from_col]
+
+            # clear starting position
             self.board[move.from_row][move.from_col] = None
 
             self.set_next_player()

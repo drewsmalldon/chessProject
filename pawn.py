@@ -1,6 +1,7 @@
 from chess_piece import ChessPiece
 from player import Player
 from move import Move
+from queen import Queen
 
 
 class Pawn(ChessPiece):
