@@ -32,7 +32,7 @@ class MoveValidity(Enum):
 # TODO: create UndoException
 class UndoException(Exception):
     # If the undo method is called when there are no moves left to undo, raise an
-    # UndoException (the GUI is already designed to handle this).
+    # UndoException (the GUI is already designed to handle this). LEAVE AS PASS! NO NEED TO DO ANYTHING ELSE
     pass
 
 
@@ -46,6 +46,8 @@ class ChessModel:
         self.__ncols = 8
         self.__message_code = None
         self.board = [[None] * self.__ncols for i in range(self.__nrows)]
+        # list keeping track of all moves
+        self.__history = []
 
         # Set up white pieces
         self.set_piece(0, 0, Rook(Player.BLACK))
@@ -104,7 +106,46 @@ class ChessModel:
         This method will return true or false based on if the game is complete
         :return: true or false
         '''
-        pass
+        # we will later determine if player in check, and if there are moves available
+        in_check = False
+        has_moves_available = False
+
+        # if in check, make in_check true
+        if self.in_check(self.current_player):
+            in_check = True
+
+        # if there is a move available, make has moves available true
+        # loop through all squares on the chess board
+        for row in range(self.__nrows):
+            for col in range(self.__ncols):
+                # grab current piece belonging to self.player
+                piece = self.piece_at(row, col)
+                # if there is a piece belonging to player loop through all possible destinations
+                if piece and piece.player == self.current_player:
+                    for to_row in range(self.__nrows):
+                        for to_col in range(self.__ncols):
+                            # create a variable for each potential move
+                            move = Move(row, col, to_row, to_col)
+                            # if that move is a valid move, then there is moves available, so then break out of all loops
+                            if self.is_valid_move(move):
+                                has_moves_available = True
+                                break
+
+                        if has_moves_available:
+                            break
+                    if has_moves_available:
+                        break
+                if has_moves_available:
+                    break
+
+        # if the player is in check and has no moves, GAME OVER
+        if in_check and not has_moves_available:
+            return True
+
+        # otherwise game is not done
+        return False
+
+
 
     def is_valid_move(self, move: Move) -> bool:
         '''
@@ -169,6 +210,10 @@ class ChessModel:
         :return: none
         '''
         if self.is_valid_move(move):
+            # add move to history
+            self.__history.append(move)
+
+            # do the move
             self.board[move.to_row][move.to_col] = self.board[move.from_row][move.from_col]
             self.board[move.from_row][move.from_col] = None
 
@@ -251,4 +296,12 @@ class ChessModel:
         undo move
         :return: none
         '''
-        pass
+        if len(self.__history) == 0:
+            raise UndoException("No moves to undo!")
+
+        previous_move = self.__history.pop()
+
+        # reverse the move
+        self.board[previous_move.from_row][previous_move.from_col] = self.board[previous_move.to_row][previous_move.to_col]
+        self.board[previous_move.to_row][previous_move.to_col] = None
+
