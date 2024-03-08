@@ -68,7 +68,10 @@ class GUI:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     x, y = pg.mouse.get_pos()
                     y, x = self.__get_coords__(y, x)
-                    piece = self.__model.piece_at(y, x)
+                    try:
+                        piece = self.__model.piece_at(y, x)
+                    except IndexError:
+                        piece = None
                     if not self._piece_selected and piece:
                         if piece.player != self.__model.current_player:
                             msg = 'Not your turn!'
