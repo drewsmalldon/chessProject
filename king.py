@@ -9,7 +9,7 @@ class King(ChessPiece):
         super().__init__(player)
 
     def __str__(self):
-        return f"This is a {'White' if self.player == Player.WHITE else 'Black'} king."
+        return f"{'White' if self.player == Player.WHITE else 'Black'} king."
 
     def type(self):
         return "King"
