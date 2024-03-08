@@ -313,3 +313,8 @@ class ChessModel:
         self.board[previous_move.from_row][previous_move.from_col] = self.board[previous_move.to_row][previous_move.to_col]
         self.board[previous_move.to_row][previous_move.to_col] = None
 
+        # set player back to whoever did the undo
+        self.set_next_player()
+
+        # ADD LOGIC TO UNDO A TAKE. IF YOU TAKE A PLAYER AND UNDO, PUT THE PLAYER BACK ON THE BOARD
+
