@@ -210,8 +210,11 @@ class ChessModel:
         :return: none
         '''
         if self.is_valid_move(move):
-            # add move to history
-            self.__history.append(move)
+            # check if there is a piece at destination
+            captured_piece = self.board[move.to_row][move.to_col]
+
+            # add move as well as captured piece (as a tuple) to history
+            self.__history.append((move, captured_piece))
 
             # check if pawn needs to get promoted
             piece = self.board[move.from_row][move.from_col]
@@ -307,14 +310,22 @@ class ChessModel:
         if len(self.__history) == 0:
             raise UndoException("No moves to undo!")
 
-        previous_move = self.__history.pop()
+        while len(self.__history) > 0:
+            # grab previous move and the piece that was captured, if there was one captured in that move
+            previous_move, captured_piece = self.__history.pop()
 
-        # reverse the move
-        self.board[previous_move.from_row][previous_move.from_col] = self.board[previous_move.to_row][previous_move.to_col]
-        self.board[previous_move.to_row][previous_move.to_col] = None
+            # store piece that was moved
+            moved_piece = self.board[previous_move.to_row][previous_move.to_col]
 
-        # set player back to whoever did the undo
+            # put back captured piece
+            self.board[previous_move.to_row][previous_move.to_col] = captured_piece
+
+            #   put piece back that was originally moved
+            self.board[previous_move.from_row][previous_move.from_col] = moved_piece
+
+            # check if move was made by current player, if not, dont allow more undos
+            if moved_piece is not None and moved_piece.player != self.current_player:
+                break
+
+        # set player back to previous player
         self.set_next_player()
-
-        # ADD LOGIC TO UNDO A TAKE. IF YOU TAKE A PLAYER AND UNDO, PUT THE PLAYER BACK ON THE BOARD
-
