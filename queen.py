@@ -9,7 +9,7 @@ class Queen(ChessPiece):
         super().__init__(player)
 
     def __str__(self):
-        return f"{'White' if self.player == Player.WHITE else 'Black'} Queen."
+        return f"{'White' if self.player == Player.WHITE else 'Black'} Queen"
 
     def type(self):
         return "Queen"

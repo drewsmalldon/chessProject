@@ -48,6 +48,7 @@ class ChessModel:
         self.board = [[None] * self.__ncols for i in range(self.__nrows)]
         # list keeping track of all moves
         self.__history = []
+        self.temp_Board = None
 
         # Set up white pieces
         self.set_piece(0, 0, Rook(Player.BLACK))
@@ -189,18 +190,30 @@ class ChessModel:
             self.__message_code = MoveValidity.Invalid
             return False
 
+        # before the move, check if player is already in check
+        currently_in_check = False
+        if self.in_check(self.current_player):
+            currently_in_check = True
+
         # create a copy of board called temp board to simulate the move
-        temp = copy.deepcopy(self.board)
+        self.temp_Board = copy.deepcopy(self.board)
         # set old spot to none and update values
-        temp[move.to_row][move.to_col] = temp[move.from_row][move.from_col]
-        temp[move.from_row][move.from_col] = None
+        self.temp_Board[move.to_row][move.to_col] = self.temp_Board[move.from_row][move.from_col]
+        self.temp_Board[move.from_row][move.from_col] = None
+
+        # Check if the player is staying in check
+        if currently_in_check and self.in_check(self.current_player):
+            self.__message_code = MoveValidity.StayingInCheck
+            return False
 
         # check if in check after the move
-        if self.in_check(self.current_player, temp):
+        if self.in_check(self.current_player):
             self.__message_code = MoveValidity.MovingIntoCheck
             return False
+
         # if all checks out, valid move
         self.__message_code = MoveValidity.Valid
+        self.temp_Board = None
         return True
 
     def move(self, move: Move):
@@ -233,16 +246,17 @@ class ChessModel:
         else:
             return False
 
-    def in_check(self, p: Player, board = None):
+    def in_check(self, p: Player):
         '''
         Check if a player is in check
         :param p: current player
-        :param board: whether it is temp or normal board
         :return: none
         '''
         # allow board attribute to use a temp board for checking, if no board is passed, its the normal board
-        if board is None:
+        if self.temp_Board is None:
             board = self.board
+        else:
+            board = self.temp_Board
         # initialize king row and col
         king_row, king_col = None, None
 

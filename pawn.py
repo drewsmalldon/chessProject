@@ -10,7 +10,7 @@ class Pawn(ChessPiece):
         super().__init__(player)
 
     def __str__(self):
-        return f"{'White' if self.player == Player.WHITE else 'Black'} pawn."
+        return f"{'White' if self.player == Player.WHITE else 'Black'} pawn"
 
     def type(self):
         return "Pawn"
