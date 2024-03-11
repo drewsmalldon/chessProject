@@ -1,7 +1,6 @@
 import copy
 from enum import Enum
 from player import Player
-from move import Move
 from chess_piece import ChessPiece
 from pawn import Pawn
 from rook import Rook
