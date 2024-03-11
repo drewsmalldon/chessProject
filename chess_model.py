@@ -312,7 +312,7 @@ class ChessModel:
         if not (0 <= row < self.__nrows) or not (0 <= col <= self.__ncols):
             raise ValueError("Row and Column must be in bounds")
         # check if piece is type chesspiece
-        if not isinstance(piece, ChessPiece):
+        if not (piece is None or isinstance(piece, ChessPiece)):
             raise TypeError("Piece must be a Chess piece.")
         self.board[row][col] = piece
 
