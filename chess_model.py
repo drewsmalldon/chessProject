@@ -250,9 +250,9 @@ class ChessModel:
         '''
         Check if a player is in check
         :param p: current player
-        :return: none
+        :return: t or f
         '''
-        # allow board attribute to use a temp board for checking, if no board is passed, its the normal board
+        # if board is still none, then use the main board as is, otherwise use the temp board that is used for testing
         if self.temp_Board is None:
             board = self.board
         else:
@@ -281,6 +281,7 @@ class ChessModel:
                     move = Move(row, col, king_row, king_col)
                     if piece.is_valid_move(move, board):
                         return True
+        return False
     def piece_at(self, row: int, col: int) -> ChessPiece:
         '''
         returns current piece at a current location
