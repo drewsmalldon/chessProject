@@ -9,6 +9,7 @@ from bishop import Bishop
 from queen import Queen
 from king import King
 from move import Move
+from random import randint
 
 
 class MoveValidity(Enum):
@@ -241,6 +242,11 @@ class ChessModel:
             self.board[move.from_row][move.from_col] = None
 
             self.set_next_player()
+
+            # call the AI function to move a black piece after a white piece is moved.
+            if self.__player == Player.BLACK:
+                self.AI()
+
             return True
         else:
             return False
@@ -343,3 +349,39 @@ class ChessModel:
 
         # set player back to previous player
         self.set_next_player()
+
+
+    def AI(self):
+        """
+        This method generates a list of black pieces and generates a list of possible moves. After iterating,
+        the black piece will make a random move based on a random number generator, selecting one of the
+        possible valid moves. This function is called after each time a white piece is moved.
+        """
+        # generate a list of random black pieces
+        random_piece = []
+        for row in range(self.__nrows):
+            for col in range(self.__ncols):
+                rand = self.board[row][col]
+                # player color must be black! if yes, add to list
+                if rand is not None and rand.player == Player.BLACK:
+                    random_piece.append((row, col, rand))
+
+        # if there are black pieces, select a random piece from the list, with a random number generator
+        if random_piece:
+            select_piece = randint(0, len(random_piece) - 1)
+            final_row, final_col, final_piece = random_piece[select_piece]
+
+        # generate a list of all possible moves for the selected random piece from previous loops
+        possible_valid_moves = []
+        for r in range(self.__nrows):
+            for c in range(self.__ncols):
+                move = Move(final_row, final_col, r, c)
+                # if the player is color black and it is a possible valid move, add to list
+                if final_piece.player == Player.BLACK and self.is_valid_move(move):
+                    possible_valid_moves.append(move)
+
+        # if there are valid moves, select a random one and perform it.
+        if possible_valid_moves:
+            select_move = randint(0, len(possible_valid_moves) - 1)
+            final_move = possible_valid_moves[select_move]
+            self.move(final_move)
