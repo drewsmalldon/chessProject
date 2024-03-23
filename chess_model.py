@@ -102,6 +102,9 @@ class ChessModel:
         '''
         return self.__message_code
 
+    def reset_board(self):
+        self.board = [[None] * 8 for _ in range(8)]
+
     def is_complete(self) -> bool:
         '''
         This method will return true or false based on if the game is complete

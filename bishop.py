@@ -49,3 +49,4 @@ class Bishop(ChessPiece):
                         if board[move.from_row - spot][move.from_col - spot] is not None:
                             return False
                     return True
+            return False
